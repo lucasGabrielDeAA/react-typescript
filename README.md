@@ -1,44 +1,133 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# react-typescript
 
-## Available Scripts
+In this application we are going to simply retrieve information from our backend application, built using [Node+Typescript](https://github.com/lucasGabrielDeAA/node-typescript). And to some type validations. So let's do this.
 
-In the project directory, you can run:
+## Running the application
 
-### `yarn start`
+You can simply clone this repository and run the application, using the following command.
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+```
+  git clone https://github.com/lucasGabrielDeAA/react-typescript && cs react-typescript
+  yarn install
+  yarn start
+```
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## Creating your onw application
 
-### `yarn test`
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app) using the following command.
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+  yarn create react-app <yourAppName> --template=typescript
+```
 
-### `yarn build`
+Then you delete all test and css files from the folder created, and remove the imports from the files. You will notice that this app contains some files with the extension **.ts** and some other with the extension **.tsx**. the difference between this files is the **JSX** usage we have on **React** environment.
+File where we are going to use **js** with only logical programming will use the **.ts** extension. And files with logical programming and visual/rendering information will use the **.tsx** extension.
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+To retrieve the data from the **backend's application** we are going to use a lib called `axios`, to do this, first of all, install it using the following command.
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+```
+  yarn add axios
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Then create a **services** folder under your **src** folder with a **api.ts** file on it. The content of this file is ahead.
 
-### `yarn eject`
+```javascript
+  import axios from 'axios';
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+  const PORT = 3333;
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+  const api = axios.create({
+    baseURL: `http://localhost:${PORT}`,
+  });
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+  export default api;
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Then, in our **App.tsx** file we are going to implement the api calls. Paste the following code on it. this code contains the typescript usage on information retrieved from the backend, and on the state of the functional component.
 
-## Learn More
+```javascript
+  import React, { useEffect, useState } from 'react';
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+  // Importing our api's file
+  import api from './services/api';
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+  // Creating the interface to isntantiate our model.
+  interface IUser {
+    name: string,
+    email: string,
+  }
+
+  function App() {
+    // The useState will use our IUser interface to determine what kind of types we are going to use.
+    const [users, setUsers] = useState<Array<IUser>>([]);
+
+    useEffect(() => {
+      loadData();
+    }, []);
+
+    const loadData = async () => {
+      // Here we are retrieving the data from the backend's application using the IUser interface to
+      // determine the data format.
+      const {data} = await api.get<Array<IUser>>('/users');
+
+      setUsers(data);
+    }
+
+    return (
+      <div className="App">
+      {/* Here we are only do a map on our user's list */}
+        {users.map(user => (
+          <p>{user.name}</p>
+        ))}
+      </div>
+    );
+  }
+
+  export default App;
+
+```
+
+Now, we are going to create our own component with typescript implementation to its properties. To do this, create a **components** folder with a **User.tsx** file on it. And paste this code on it.
+
+```javascript
+  import React from 'react';
+
+  // interface used to instantiate our model
+  interface IUser {
+    name: string,
+    email: string,
+  }
+
+  // interface used to determines the component's property type.
+  interface Props {
+    user: IUser,
+  }
+
+  // To override the current property types from the react components and use the children and other default
+  // properties, we need to determine the types of ouw properties like this.
+  const User: React.FunctionComponent<Props> = ({ user }) => {
+    return (
+      <div>
+        <p><b>Nome: {user.name}</b></p>
+        <p><b>Email: {user.email}</b></p>
+      </div>
+    )
+  }
+
+  export default User;
+```
+
+After that you can use this component on the **App.tsx** file. just doing some updated.
+
+```javascript
+  ...
+  // Importing our component
+  import User from './components/User';
+  ...
+
+  ...
+  {users.map(user => (
+    <User user={user} />
+  ))}
+  ...
+```
