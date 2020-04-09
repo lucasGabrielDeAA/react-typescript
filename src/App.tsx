@@ -1,24 +1,38 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+
+// Importing our api's file
+import api from './services/api';
+
+import User from './components/User';
+
+// Creating the interface to isntantiate our model.
+interface IUser {
+  name: string,
+  email: string,
+}
 
 function App() {
+  // The useState will use our IUser interface to determine what kind of types we are going to use.
+  const [users, setUsers] = useState<Array<IUser>>([]);
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    // Here we are retrieving the data from the backend's application using the IUser interface to
+    // determine the data format.
+    const {data} = await api.get<Array<IUser>>('/users');
+
+    setUsers(data);
+  }
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    {/* Here we are only do a map on our user's list */}
+      {users.map(user => (
+        <User user={user} />
+      ))}
     </div>
   );
 }
