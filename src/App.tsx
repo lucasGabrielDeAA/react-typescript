@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 // Importing our api's file
 import api from './services/api';
 
+// Importing our component
 import User from './components/User';
 
 // Creating the interface to isntantiate our model.
